@@ -1,5 +1,9 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/traz9948/public_html/
-    - /bin/cp -R index.html assets $DEPLOYPATH
+    - export APP=/home/traz9948/p3k_app
+    - export PUB=/home/traz9948/public_html
+    - /bin/mkdir -p $APP
+    - /bin/rsync -a --exclude='.git' --exclude='.env' --exclude='storage' --exclude='public' ./ $APP/
+    - /bin/rsync -a public/ $PUB/
+    - cd $APP && /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
