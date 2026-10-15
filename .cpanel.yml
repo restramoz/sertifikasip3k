@@ -1,9 +1,5 @@
 ---
 deployment:
   tasks:
-    - export APP=/home/traz9948/p3k_app
-    - export LINK=/home/traz9948/public_html/sertifikasip3k
-    - /bin/mkdir -p $APP
-    - /bin/rsync -a --exclude='.git' --exclude='.env' --exclude='node_modules' ./ $APP/
-    - /bin/rm -rf $LINK
-    - /bin/ln -s $APP/public $LINK
+    - export APP=/home/traz9948/public_html/sertifikasip3k
+    - /bin/rsync -a --exclude='.git' --exclude='.env' --exclude='node_modules' --exclude='storage/logs' ./ $APP/
