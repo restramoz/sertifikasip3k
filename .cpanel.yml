@@ -2,8 +2,8 @@
 deployment:
   tasks:
     - export APP=/home/traz9948/p3k_app
-    - export PUB=/home/traz9948/public_html
+    - export LINK=/home/traz9948/public_html/sertifikasip3k
     - /bin/mkdir -p $APP
-    - /bin/rsync -a --exclude='.git' --exclude='.env' --exclude='storage' --exclude='public' ./ $APP/
-    - /bin/rsync -a public/ $PUB/
-    - cd $APP && /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
+    - /bin/rsync -a --exclude='.git' --exclude='.env' --exclude='node_modules' ./ $APP/
+    - /bin/rm -rf $LINK
+    - /bin/ln -s $APP/public $LINK
