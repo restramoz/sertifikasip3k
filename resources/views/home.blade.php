@@ -402,26 +402,37 @@
                 </div>
             </div>
 
-            <!-- Regional Search Filter Widget -->
-            <div class="mb-8" x-data="{ search: '' }">
+            <!-- Search Input -->
+            <div class="mb-8">
                 <div class="relative max-w-md">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         id="city-search-input"
-                        placeholder="Cari nama kota atau kabupaten..." 
-                        class="w-full pl-10 pr-4 py-2.5 text-sm bg-[var(--color-background)] border border-[var(--color-border)] rounded-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
+                        placeholder="Cari nama kota atau kabupaten..."
+                        class="w-full pl-10 pr-10 py-2.5 text-sm bg-[var(--color-background)] border border-[var(--color-border)] rounded-[14px] focus:outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)]"
                         aria-label="Cari kota atau kabupaten"
+                        autocomplete="off"
                     >
-                    <svg class="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-[var(--color-text-muted)] absolute left-3.5 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
+                    <button type="button" id="city-search-clear" class="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-secondary)] transition-colors hidden" aria-label="Hapus pencarian">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <p id="city-search-meta" class="text-xs text-[var(--color-text-muted)] mt-2 hidden"></p>
             </div>
 
-            <!-- Featured Cities Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5" id="city-list-container">
-                @foreach($featuredCities as $city)
-                    <a href="{{ route('city.landing', ['citySlug' => $city['slug']]) }}" class="city-card-item card-premium p-4 flex flex-col justify-between hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] transition-colors group" data-name="{{ strtolower($city['name']) }}">
+            <!-- Search Results Grid (hidden by default, shown when searching) -->
+            <div id="city-search-results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 hidden"></div>
+
+            <!-- Default Paginated Grid (shown when not searching) -->
+            <div id="city-paginated-grid">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+                    @foreach($paginatedCities as $city)
+                    <a href="{{ route('city.landing', ['citySlug' => $city['slug']]) }}" class="card-premium p-4 flex flex-col justify-between hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] transition-colors group">
                         <div>
                             <span class="text-[10px] font-heading font-semibold uppercase px-1.5 py-0.5 rounded bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] group-hover:bg-white inline-block mb-1.5">
                                 {{ $city['type'] }}
@@ -437,8 +448,11 @@
                             Info &rarr;
                         </span>
                     </a>
-                @endforeach
-            </div>
+                    @endforeach
+                </div>
+
+                <div class="mt-6">{{ $paginatedCities->links() }}</div>
+            </div>{{-- end #city-paginated-grid --}}
 
             <p class="text-xs text-[var(--color-text-muted)] mt-6 text-center">
                 Memerlukan pelatihan di kota lain? Semua 514 kota dan kabupaten di 38 provinsi terhubung dalam basis data kami.
@@ -550,25 +564,75 @@
         </div>
     </section>
 
-    <!-- Client-side filter script for quick city lookup -->
+    <!-- Instant client-side city search — data injected from controller -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('city-search-input');
-            const cityCards = document.querySelectorAll('.city-card-item');
+        (function () {
+            const ALL_CITIES = @json($allCitiesForSearch);
 
-            if (searchInput) {
-                searchInput.addEventListener('input', function (e) {
-                    const query = e.target.value.toLowerCase().trim();
-                    cityCards.forEach(function (card) {
-                        const name = card.getAttribute('data-name') || '';
-                        if (name.includes(query)) {
-                            card.style.display = 'flex';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-                });
+            const input     = document.getElementById('city-search-input');
+            const clearBtn  = document.getElementById('city-search-clear');
+            const meta      = document.getElementById('city-search-meta');
+            const results   = document.getElementById('city-search-results');
+            const paginated = document.getElementById('city-paginated-grid');
+
+            if (!input) { return; }
+
+            const cityUrlTemplate = '{{ route('city.landing', ['citySlug' => ':slug']) }}';
+
+            function cityCardHtml(city) {
+                return '<a href="' + cityUrlTemplate.replace(':slug', city.slug) + '" class="card-premium p-4 flex flex-col justify-between hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-soft)] transition-colors group">'
+                    + '<div>'
+                    + '<span class="text-[10px] font-heading font-semibold uppercase px-1.5 py-0.5 rounded bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] group-hover:bg-white inline-block mb-1.5">'
+                    + city.type
+                    + '</span>'
+                    + '<h3 class="font-heading font-bold text-sm text-[var(--color-secondary)] group-hover:text-[var(--color-primary)]">' + city.raw_name + '</h3>'
+                    + '<span class="text-[11px] text-[var(--color-text-muted)] block mt-0.5">' + city.province + '</span>'
+                    + '</div>'
+                    + '<span class="text-[11px] font-heading font-semibold text-[var(--color-primary)] mt-3 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">Info &rarr;</span>'
+                    + '</a>';
             }
-        });
+
+            function doSearch(query) {
+                const q = query.trim().toLowerCase();
+
+                if (q === '') {
+                    results.classList.add('hidden');
+                    results.innerHTML = '';
+                    paginated.classList.remove('hidden');
+                    meta.classList.add('hidden');
+                    clearBtn.classList.add('hidden');
+                    return;
+                }
+
+                clearBtn.classList.remove('hidden');
+
+                const matched = ALL_CITIES.filter(function (c) {
+                    return c.name.toLowerCase().includes(q) || c.province.toLowerCase().includes(q);
+                });
+
+                paginated.classList.add('hidden');
+                results.classList.remove('hidden');
+
+                if (matched.length) {
+                    results.innerHTML = matched.map(cityCardHtml).join('');
+                    meta.textContent = matched.length + ' kota/kabupaten ditemukan';
+                } else {
+                    results.innerHTML = '<p class="col-span-full text-sm text-[var(--color-text-muted)] py-8 text-center">Tidak ada hasil untuk "<strong>' + query.trim() + '</strong>".</p>';
+                    meta.textContent = '0 kota/kabupaten ditemukan';
+                }
+
+                meta.classList.remove('hidden');
+            }
+
+            input.addEventListener('input', function () {
+                doSearch(this.value);
+            });
+
+            clearBtn.addEventListener('click', function () {
+                input.value = '';
+                doSearch('');
+                input.focus();
+            });
+        }());
     </script>
 @endsection

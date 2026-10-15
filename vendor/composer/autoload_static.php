@@ -487,6 +487,7 @@ class ComposerStaticInitcda2add6397422fb1a2eb5b9207f1575
     public static $classMap = array (
         'AllowDynamicProperties' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/AllowDynamicProperties.php',
         'App\\Console\\Commands\\CreateAdminCommand' => __DIR__ . '/../..' . '/app/Console/Commands/CreateAdminCommand.php',
+        'App\\Console\\Commands\\WilayahSyncCommand' => __DIR__ . '/../..' . '/app/Console/Commands/WilayahSyncCommand.php',
         'App\\Http\\Controllers\\Admin\\ArticleController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/ArticleController.php',
         'App\\Http\\Controllers\\Auth\\LoginController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/LoginController.php',
         'App\\Http\\Controllers\\CityPageController' => __DIR__ . '/../..' . '/app/Http/Controllers/CityPageController.php',
@@ -496,6 +497,8 @@ class ComposerStaticInitcda2add6397422fb1a2eb5b9207f1575
         'App\\Http\\Controllers\\PublicArticleController' => __DIR__ . '/../..' . '/app/Http/Controllers/PublicArticleController.php',
         'App\\Http\\Middleware\\EnsureUserIsAdmin' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserIsAdmin.php',
         'App\\Models\\Article' => __DIR__ . '/../..' . '/app/Models/Article.php',
+        'App\\Models\\City' => __DIR__ . '/../..' . '/app/Models/City.php',
+        'App\\Models\\Kecamatan' => __DIR__ . '/../..' . '/app/Models/Kecamatan.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Services\\HtmlSanitizerService' => __DIR__ . '/../..' . '/app/Services/HtmlSanitizerService.php',

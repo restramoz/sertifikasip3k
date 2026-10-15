@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ asset('favico.png') }}">
     <title>
         @hasSection('title')
             @yield('title') - {{ config('app.name', 'Pelatihan P3K') }}
@@ -46,7 +47,7 @@
                     </span>
                     <div class="flex flex-col text-left">
                         <span class="font-heading font-bold text-xl tracking-tight text-[var(--color-secondary)] group-hover:text-[var(--color-primary)] transition-colors">
-                            PELATIHAN P3K
+                            Serifikasi P3K Limited
                         </span>
                         <span class="text-[11px] font-sans font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                             Tanggap Darurat Medis K3
@@ -195,5 +196,8 @@
             }
         });
     </script>
+
+    <!-- Floating WhatsApp Button -->
+      <x-wa-float />
 </body>
 </html>

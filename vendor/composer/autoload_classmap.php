@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'AllowDynamicProperties' => $vendorDir . '/symfony/polyfill-php82/Resources/stubs/AllowDynamicProperties.php',
     'App\\Console\\Commands\\CreateAdminCommand' => $baseDir . '/app/Console/Commands/CreateAdminCommand.php',
+    'App\\Console\\Commands\\WilayahSyncCommand' => $baseDir . '/app/Console/Commands/WilayahSyncCommand.php',
     'App\\Http\\Controllers\\Admin\\ArticleController' => $baseDir . '/app/Http/Controllers/Admin/ArticleController.php',
     'App\\Http\\Controllers\\Auth\\LoginController' => $baseDir . '/app/Http/Controllers/Auth/LoginController.php',
     'App\\Http\\Controllers\\CityPageController' => $baseDir . '/app/Http/Controllers/CityPageController.php',
@@ -17,6 +18,8 @@ return array(
     'App\\Http\\Controllers\\PublicArticleController' => $baseDir . '/app/Http/Controllers/PublicArticleController.php',
     'App\\Http\\Middleware\\EnsureUserIsAdmin' => $baseDir . '/app/Http/Middleware/EnsureUserIsAdmin.php',
     'App\\Models\\Article' => $baseDir . '/app/Models/Article.php',
+    'App\\Models\\City' => $baseDir . '/app/Models/City.php',
+    'App\\Models\\Kecamatan' => $baseDir . '/app/Models/Kecamatan.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Services\\HtmlSanitizerService' => $baseDir . '/app/Services/HtmlSanitizerService.php',

@@ -249,7 +249,10 @@ PROMPT;
                 ];
             }
 
-            return $this->parseResponse($rawContent, $topic, $cityName, $wordCount);
+            $result = $this->parseResponse($rawContent, $topic, $cityName, $wordCount);
+            $result = $this->addPhoneNumbers($result);
+
+            return $result;
         } catch (ConnectionException $e) {
             Log::error('Ollama connection timeout or unreachable: '.$e->getMessage());
 
@@ -351,5 +354,57 @@ PROMPT;
             ],
             'raw' => $rawContent,
         ];
+    }
+
+    /**
+     * Insert phone numbers into article content at top, middle, and bottom.
+     *
+     * @param  array<string, mixed>  $result
+     * @return array<string, mixed>
+     */
+    protected function addPhoneNumbers(array $result): array
+    {
+        $phones = ['08118500177', '081399810272', '087894580806', '087894580649'];
+        $times = random_int(3, 7);
+        // Sanitize content to remove unwanted LaTeX arrows or stray $ symbols.
+        $content = $this->sanitizeContent($result['content'] ?? '');
+        $fragments = [];
+        for ($i = 0; $i < $times; $i++) {
+            $phone = $phones[array_rand($phones)];
+            // WhatsApp CTA link with optional pre-filled message.
+            $waLink = 'https://wa.me/'.$phone.'?text='.urlencode('Halo, saya ingin bertanya mengenai layanan P3K.');
+            $fragments[] = '<p class="contact-number"><a href="'.$waLink.'" target="_blank" class="whatsapp-cta">'.$phone.'</a></p>';
+        }
+        // Top, middle, bottom placements
+        $top = $fragments[0] ?? '';
+        $bottom = $fragments[1] ?? '';
+        $middle = $fragments[2] ?? '';
+        $newContent = $top.$content.$bottom;
+        $midPos = (int) floor(strlen($newContent) / 2);
+        $newContent = substr_replace($newContent, $middle, $midPos, 0);
+        if (count($fragments) > 3) {
+            $extra = implode('', array_slice($fragments, 3));
+            $newContent .= $extra;
+        }
+        $result['content'] = $newContent;
+
+        return $result;
+    }
+
+    protected function sanitizeContent(string $content): string
+    {
+        // Replace LaTeX arrow patterns like "$ \\rightarrow$" or "$ ightarrow$" with a proper arrow.
+        $patterns = [
+            '/\$\s*\\\\?rightarrow\s*\$/i',
+            '/\$\s*ightarrow\s*\$/i',
+        ];
+        foreach ($patterns as $pattern) {
+            $content = preg_replace($pattern, '→', $content);
+        }
+
+        // Remove any remaining stray dollar signs.
+        $content = str_replace('$', '', $content);
+
+        return $content;
     }
 }

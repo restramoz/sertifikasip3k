@@ -23,5 +23,7 @@ class HomepageTest extends TestCase
         $response->assertSee('4 Langkah Pelaksanaan Pelatihan P3K');
         $response->assertSee('Cakupan Wilayah', false);
         $response->assertSee('Pertanyaan yang Sering Diajukan');
+        $response->assertSee(route('city.landing', ['citySlug' => ':slug']), false);
+        $response->assertDontSee('/pelatihan-p3k/');
     }
 }
